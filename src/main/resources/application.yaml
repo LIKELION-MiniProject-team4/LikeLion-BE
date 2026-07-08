@@ -21,3 +21,7 @@ app:
     allowed-origins:
       - http://localhost:3000
       - http://localhost:8080
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
