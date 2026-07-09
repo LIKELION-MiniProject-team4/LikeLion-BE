@@ -31,6 +31,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'  // 로컬 개발/테스트용 인메모리 DB
     runtimeOnly 'com.mysql:mysql-connector-j'  // 운영 DB(MySQL) 드라이버
 
+    implementation platform('software.amazon.awssdk:bom:2.31.78')  // AWS SDK v2 버전 통일 관리
+    implementation 'software.amazon.awssdk:s3'  // S3 업로드/삭제 (파일 도메인)
+
     compileOnly 'org.projectlombok:lombok'  // @Getter, @RequiredArgsConstructor 등 보일러플레이트 코드 생성 (컴파일 시점에만 필요)
     annotationProcessor 'org.projectlombok:lombok'  // Lombok 어노테이션을 실제 바이트코드로 처리
     developmentOnly 'org.springframework.boot:spring-boot-devtools'  // 코드 변경 시 자동 재시작 (개발 편의용, 배포 빌드엔 포함 안 됨)
