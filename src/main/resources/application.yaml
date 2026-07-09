@@ -2,10 +2,10 @@ spring:
   application:
     name: Professor-info-system
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/wiki?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
