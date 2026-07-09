@@ -1,6 +1,5 @@
-package com.likelion.miniproject.file.s3;
+package com.likelion.miniproject.infrastructure.s3;
 
-import com.likelion.miniproject.file.exception.FileUploadException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,7 +36,7 @@ public class S3FileStorage {
             );
         } catch (IOException | S3Exception e) {
             log.error("S3 파일 업로드 실패 - key: {}", key, e);
-            throw new FileUploadException(e);
+            throw new S3UploadException(e);
         }
 
         return buildPublicUrl(key);

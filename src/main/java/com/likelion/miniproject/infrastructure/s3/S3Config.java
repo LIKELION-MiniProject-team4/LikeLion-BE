@@ -1,4 +1,4 @@
-package com.likelion.miniproject.file.s3;
+package com.likelion.miniproject.infrastructure.s3;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
