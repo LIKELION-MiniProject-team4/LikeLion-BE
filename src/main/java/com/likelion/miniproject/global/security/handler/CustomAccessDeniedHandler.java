@@ -1,20 +1,19 @@
 package com.likelion.miniproject.global.security.handler;
 
+import com.likelion.miniproject.global.response.GlobalApiErrorResponse;
 import com.likelion.miniproject.global.security.exception.AuthErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 // 인가 실패(403) 응답
 @Slf4j
@@ -32,14 +31,16 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     ) throws IOException {
 
         AuthErrorCode errorCode = AuthErrorCode.ACCESS_DENIED;
+        String traceId = MDC.get("traceId");
 
         log.warn(
-                "event=access_denied status={} method={} uri={} remoteAddr={} userAgent={} message={}",
+                "event=access_denied status={} method={} uri={} remoteAddr={} userAgent={} traceId={} message={}",
                 errorCode.getHttpStatus().value(),
                 request.getMethod(),
                 request.getRequestURI(),
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent"),
+                traceId,
                 accessDeniedException.getMessage()
         );
 
@@ -47,14 +48,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        Map<String, Object> errorResponse = new LinkedHashMap<>();
-        errorResponse.put("timestamp", LocalDateTime.now().toString());
-        errorResponse.put("status", errorCode.getHttpStatus().value());
-        errorResponse.put("error", errorCode.getHttpStatus().getReasonPhrase());
-        errorResponse.put("code", errorCode.getCode());
-        errorResponse.put("message", errorCode.getMessage());
-        errorResponse.put("path", request.getRequestURI());
-
-        objectMapper.writeValue(response.getWriter(), errorResponse);
+        objectMapper.writeValue(
+                response.getWriter(),
+                GlobalApiErrorResponse.of(errorCode, traceId)
+        );
     }
 }

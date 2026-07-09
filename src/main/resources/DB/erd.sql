@@ -22,6 +22,21 @@ CREATE TABLE `refresh_tokens` (
     CONSTRAINT `fk_refresh_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 );
 
+-- 공용 파일 테이블 (짐짝 FileJpaEntity 참고). S3에 실제 파일 저장, 여기는 메타데이터만.
+-- 지금은 수강확인서 업로드가 유일한 용도라 file_type 구분 없이 단일 용도로 사용.
+CREATE TABLE `file` (
+    `file_id`        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `uploader_id`    BIGINT NOT NULL,
+    `original_name`  VARCHAR(255) NOT NULL,
+    `stored_name`    VARCHAR(255) NOT NULL,
+    `file_url`       VARCHAR(2048) NOT NULL,
+    `content_type`   VARCHAR(100) NOT NULL,
+    `file_size`      BIGINT NOT NULL,
+    `created_at`     DATETIME NOT NULL,
+    `deleted_at`     DATETIME,
+    CONSTRAINT `fk_file_uploader` FOREIGN KEY (`uploader_id`) REFERENCES `users` (`user_id`)
+);
+
 CREATE TABLE `department` (
     `department_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `name`          VARCHAR(100) NOT NULL
@@ -41,13 +56,32 @@ CREATE TABLE `subject` (
     CONSTRAINT `fk_subject_professor` FOREIGN KEY (`professor_id`) REFERENCES `professor` (`professor_id`)
 );
 
+-- 수강확인서 제출 단위 (파일 하나 = 1 row). 관리자가 파일을 보고 승인하면서
+-- 그 안에 포함된 과목 개수만큼 `enrollment` row를 생성한다 (짐짝 TrainerApplication -> TrainerProfile/Certification 패턴과 동일)
+CREATE TABLE `enrollment_application` (
+    `enrollment_application_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id`            BIGINT NOT NULL,
+    `semester`            VARCHAR(20) NOT NULL,
+    `file_id`             BIGINT NOT NULL,
+    `status`              VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `reject_reason`       VARCHAR(500),
+    `reviewed_by`         BIGINT,
+    `reviewed_at`         DATETIME,
+    `created_at`          DATETIME NOT NULL,
+    `updated_at`          DATETIME,
+    CONSTRAINT `fk_enrollment_application_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+    CONSTRAINT `fk_enrollment_application_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`user_id`),
+    CONSTRAINT `fk_enrollment_application_file` FOREIGN KEY (`file_id`) REFERENCES `file` (`file_id`)
+);
+
+-- 과목 단위 (승인 시점에 enrollment_application 하나당 N개 생성됨)
 CREATE TABLE `enrollment` (
-    `enrollment_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `user_id`       BIGINT NOT NULL,
-    `subject_id`    BIGINT NOT NULL,
-    `semester`      VARCHAR(20) NOT NULL,
-    `created_at`    DATETIME NOT NULL,
-    UNIQUE KEY `uk_enrollment_user_subject_semester` (`user_id`, `subject_id`, `semester`),
+    `enrollment_id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `enrollment_application_id`   BIGINT NOT NULL,
+    `user_id`                     BIGINT NOT NULL,
+    `subject_id`                  BIGINT NOT NULL,
+    `created_at`                  DATETIME NOT NULL,
+    CONSTRAINT `fk_enrollment_application` FOREIGN KEY (`enrollment_application_id`) REFERENCES `enrollment_application` (`enrollment_application_id`),
     CONSTRAINT `fk_enrollment_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
     CONSTRAINT `fk_enrollment_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`)
 );
