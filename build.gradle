@@ -31,6 +31,8 @@ dependencies {
     runtimeOnly 'com.h2database:h2'  // 로컬 개발/테스트용 인메모리 DB
     runtimeOnly 'com.mysql:mysql-connector-j'  // 운영 DB(MySQL) 드라이버
 
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'  // .env 파일을 환경변수처럼 자동 로드 (DB 계정, AWS 키 등 민감정보 분리)
+
     implementation platform('software.amazon.awssdk:bom:2.31.78')  // AWS SDK v2 버전 통일 관리
     implementation 'software.amazon.awssdk:s3'  // S3 업로드/삭제 (파일 도메인)
 
