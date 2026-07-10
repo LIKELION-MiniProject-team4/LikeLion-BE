@@ -72,6 +72,12 @@ public class SecurityConfig {
                         // TODO: 이 프로젝트의 도메인 인가 규칙을 여기에 추가한다.
                         // 예) .requestMatchers(HttpMethod.POST, "/api/xxx/**").hasAuthority("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/professors/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/professors/**").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/tags").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/tags").hasAuthority("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
