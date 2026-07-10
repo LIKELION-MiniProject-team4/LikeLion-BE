@@ -5,7 +5,7 @@ import com.likelion.miniproject.file.exception.FileErrorCode;
 import com.likelion.miniproject.file.exception.FileNotFoundException;
 import com.likelion.miniproject.file.exception.InvalidFileException;
 import com.likelion.miniproject.file.repository.FileRepository;
-import com.likelion.miniproject.file.s3.S3FileStorage;
+import com.likelion.miniproject.infrastructure.s3.S3FileStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
