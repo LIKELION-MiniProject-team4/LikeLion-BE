@@ -1,9 +1,9 @@
-package com.likelion.miniproject.tag.exception;
+package com.likelion.miniproject.global.certificate.exception;
 
 import com.likelion.miniproject.global.exception.ForbiddenException;
 
 public class CertificateNotApprovedException extends ForbiddenException {
     public CertificateNotApprovedException() {
-        super(TagErrorCode.CERTIFICATE_NOT_APPROVED, TagErrorCode.CERTIFICATE_NOT_APPROVED.getMessage());
+        super(CertificateAccessErrorCode.CERTIFICATE_NOT_APPROVED, CertificateAccessErrorCode.CERTIFICATE_NOT_APPROVED.getMessage());
     }
 }

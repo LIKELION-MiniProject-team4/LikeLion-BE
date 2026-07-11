@@ -3,7 +3,7 @@ package com.likelion.miniproject.tag;
 import com.likelion.miniproject.global.certificate.CertificateAccessChecker;
 import com.likelion.miniproject.professor.Professor;
 import com.likelion.miniproject.professor.ProfessorService;
-import com.likelion.miniproject.tag.exception.CertificateNotApprovedException;
+import com.likelion.miniproject.global.certificate.exception.CertificateNotApprovedException;
 import com.likelion.miniproject.tag.exception.DuplicateTagClickException;
 import com.likelion.miniproject.tag.exception.DuplicateTagNameException;
 import com.likelion.miniproject.tag.exception.TagNotFoundException;
