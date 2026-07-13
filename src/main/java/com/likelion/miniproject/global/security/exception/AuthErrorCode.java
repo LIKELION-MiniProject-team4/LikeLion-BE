@@ -1,12 +1,13 @@
 package com.likelion.miniproject.global.security.exception;
 
+import com.likelion.miniproject.global.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum AuthErrorCode {
+public enum AuthErrorCode implements ErrorCode {
     ACCESS_TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "AUTH_401_001", "Access Token이 없습니다."),
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH_401_002", "Access Token이 만료되었습니다."),
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_401_003", "유효하지 않은 Access Token입니다."),

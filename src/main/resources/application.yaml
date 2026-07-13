@@ -2,17 +2,17 @@ spring:
   application:
     name: Professor-info-system
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/wiki?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
 jwt:
-  secret: local-test-secret-key-please-change-this-to-something-random-and-long
+  secret: ${JWT_SECRET}
   access-token-expiration: 900000
   refresh-token-expiration: 1296000000
 
@@ -21,3 +21,17 @@ app:
     allowed-origins:
       - http://localhost:3000
       - http://localhost:8080
+
+# 실제 S3 버킷 준비되면 환경변수(AWS_REGION 등)로 채울 것. 지금은 로컬 부팅만 되게 기본값 넣어둠.
+cloud:
+  aws:
+    region: ${AWS_REGION:ap-northeast-2}
+    credentials:
+      access-key: ${AWS_S3_ACCESS_KEY_ID:changeme}
+      secret-key: ${AWS_S3_SECRET_ACCESS_KEY:changeme}
+    s3:
+      bucket: ${AWS_S3_BUCKET_NAME:changeme}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
