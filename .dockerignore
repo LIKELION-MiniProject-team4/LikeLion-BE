@@ -1,0 +1,11 @@
+.git
+.gradle
+.idea
+.gitignore
+.gitattributes
+build
+*.md
+.env
+.env.example
+docker-compose.yml
+Dockerfile
