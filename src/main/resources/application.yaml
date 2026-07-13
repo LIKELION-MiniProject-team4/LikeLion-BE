@@ -12,7 +12,7 @@ spring:
     show-sql: true
 
 jwt:
-  secret: local-test-secret-key-please-change-this-to-something-random-and-long
+  secret: ${JWT_SECRET}
   access-token-expiration: 900000
   refresh-token-expiration: 1296000000
 
