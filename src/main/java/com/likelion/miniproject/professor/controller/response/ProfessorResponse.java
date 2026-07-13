@@ -1,13 +1,15 @@
-package com.likelion.miniproject.professor;
+package com.likelion.miniproject.professor.controller.response;
 
-public record ProfessorResponseDto(
+import com.likelion.miniproject.professor.entity.Professor;
+
+public record ProfessorResponse(
         Long professorId,
         String name,
         Long departmentId,
         String departmentName
 ) {
-    public static ProfessorResponseDto from(Professor professor) {
-        return new ProfessorResponseDto(
+    public static ProfessorResponse from(Professor professor) {
+        return new ProfessorResponse(
                 professor.getId(), professor.getName(),
                 professor.getDepartment().getId(), professor.getDepartment().getName()
         );

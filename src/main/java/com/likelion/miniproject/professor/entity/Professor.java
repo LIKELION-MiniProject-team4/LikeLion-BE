@@ -1,4 +1,4 @@
-package com.likelion.miniproject.professor;
+package com.likelion.miniproject.professor.entity;
 
 import com.likelion.miniproject.department.Department;
 import jakarta.persistence.*;

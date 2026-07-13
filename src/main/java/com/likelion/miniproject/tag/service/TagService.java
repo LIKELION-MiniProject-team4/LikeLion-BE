@@ -1,12 +1,18 @@
-package com.likelion.miniproject.tag;
+package com.likelion.miniproject.tag.service;
 
 import com.likelion.miniproject.global.certificate.CertificateAccessChecker;
-import com.likelion.miniproject.professor.Professor;
-import com.likelion.miniproject.professor.ProfessorService;
-import com.likelion.miniproject.tag.exception.CertificateNotApprovedException;
+import com.likelion.miniproject.global.certificate.exception.CertificateNotApprovedException;
+import com.likelion.miniproject.professor.entity.Professor;
+import com.likelion.miniproject.professor.service.ProfessorService;
+import com.likelion.miniproject.tag.controller.request.TagCreateRequest;
+import com.likelion.miniproject.tag.controller.response.TagResponse;
+import com.likelion.miniproject.tag.entity.Tag;
+import com.likelion.miniproject.tag.entity.TagClick;
 import com.likelion.miniproject.tag.exception.DuplicateTagClickException;
 import com.likelion.miniproject.tag.exception.DuplicateTagNameException;
 import com.likelion.miniproject.tag.exception.TagNotFoundException;
+import com.likelion.miniproject.tag.repository.TagClickRepository;
+import com.likelion.miniproject.tag.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,22 +29,23 @@ public class TagService {
     private final CertificateAccessChecker certificateAccessChecker;
 
     @Transactional
-    public TagResponseDto createTag(TagCreateRequestDto request) {
-        if (tagRepository.existsByName(request.name())) {
+    public TagResponse createTag(TagCreateRequest request) {
+        if (tagRepository.existsByName(request.getName())) {
             throw new DuplicateTagNameException();
         }
-        Tag tag = tagRepository.save(Tag.builder().name(request.name()).build());
-        return TagResponseDto.from(tag);
+        Tag tag = tagRepository.save(request.toEntity());
+        return TagResponse.from(tag);
     }
 
     @Transactional(readOnly = true)
-    public List<TagResponseDto> getAllTags() {
-        return tagRepository.findAll().stream().map(TagResponseDto::from).toList();
+    public List<TagResponse> getAllTags() {
+        return tagRepository.findAll().stream().map(TagResponse::from).toList();
     }
 
-    /** 수강확인서 승인자만 클릭 가능(403), 동일 조합 재클릭 불가(409) */
     @Transactional
     public void click(Long userId, Long professorId, Long tagId) {
+        Professor professor = professorService.getProfessorOrThrow(professorId);
+
         if (!certificateAccessChecker.isApproved(userId, professorId)) {
             throw new CertificateNotApprovedException();
         }
@@ -47,7 +54,6 @@ public class TagService {
             throw new DuplicateTagClickException();
         }
 
-        Professor professor = professorService.getProfessorOrThrow(professorId);
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(TagNotFoundException::new);
 

@@ -1,4 +1,4 @@
-package com.likelion.miniproject.tag;
+package com.likelion.miniproject.tag.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,8 +1,12 @@
-package com.likelion.miniproject.professor;
+package com.likelion.miniproject.professor.service;
 
 import com.likelion.miniproject.department.Department;
 import com.likelion.miniproject.department.DepartmentRepository;
+import com.likelion.miniproject.professor.controller.request.ProfessorCreateRequest;
+import com.likelion.miniproject.professor.controller.response.ProfessorResponse;
+import com.likelion.miniproject.professor.entity.Professor;
 import com.likelion.miniproject.professor.exception.ProfessorNotFoundException;
+import com.likelion.miniproject.professor.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +21,7 @@ public class ProfessorService {
     private final DepartmentRepository departmentRepository;
 
     @Transactional
-    public ProfessorResponseDto create(ProfessorCreateRequestDto request) {
+    public ProfessorResponse create(ProfessorCreateRequest request) {
         Department department = departmentRepository.findByName(request.departmentName())
                 .orElseGet(() -> departmentRepository.save(
                         Department.builder().name(request.departmentName()).build()
@@ -28,19 +32,19 @@ public class ProfessorService {
                 .department(department)
                 .build();
         professorRepository.save(professor);
-        return ProfessorResponseDto.from(professor);
+        return ProfessorResponse.from(professor);
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorResponseDto> getList(String departmentName) {
+    public List<ProfessorResponse> getList(String departmentName) {
         return professorRepository.search(departmentName).stream()
-                .map(ProfessorResponseDto::from)
+                .map(ProfessorResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ProfessorResponseDto getDetail(Long professorId) {
-        return ProfessorResponseDto.from(getProfessorOrThrow(professorId));
+    public ProfessorResponse getDetail(Long professorId) {
+        return ProfessorResponse.from(getProfessorOrThrow(professorId));
     }
 
     public Professor getProfessorOrThrow(Long professorId) {

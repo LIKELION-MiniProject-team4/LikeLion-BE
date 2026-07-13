@@ -1,6 +1,7 @@
-package com.likelion.miniproject.tag;
+package com.likelion.miniproject.review.entity;
 
-import com.likelion.miniproject.professor.Professor;
+import com.likelion.miniproject.professor.entity.Professor;
+import com.likelion.miniproject.subject.entity.Subject;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,16 +12,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tag_click", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "professor_id", "tag_id"})
+@Table(name = "review", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "subject_id"})
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TagClick {
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tag_click_id")
+    @Column(name = "review_id")
     private Long id;
 
     @Column(name = "user_id", nullable = false)
@@ -31,17 +32,21 @@ public class TagClick {
     private Professor professor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id", nullable = false)
-    private Tag tag;
+    @JoinColumn(name = "subject_id", nullable = false)
+    private Subject subject;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public TagClick(Long userId, Professor professor, Tag tag) {
+    public Review(Long userId, Professor professor, Subject subject, String content) {
         this.userId = userId;
         this.professor = professor;
-        this.tag = tag;
+        this.subject = subject;
+        this.content = content;
     }
 }
