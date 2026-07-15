@@ -15,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.likelion.miniproject.examarchive.controller.request.ExamArchiveWriteRequest;
+import com.likelion.miniproject.examarchive.exception.ExamArchiveAccessDeniedException;
+import com.likelion.miniproject.global.certificate.exception.CertificateNotApprovedException;
+
 import java.util.List;
 
 @Service
@@ -72,4 +76,42 @@ public class ExamArchiveService {
 
         return ExamArchiveContentResponse.from(archive, writerSemester);
     }
+
+    /** 텍스트 전용 작성. 수강확인서 승인자만 가능 */
+    @Transactional
+    public ExamArchiveContentResponse write(Long userId, Long professorId, ExamArchiveWriteRequest request) {
+        var professor = professorService.getProfessorOrThrow(professorId);
+
+        if (!certificateAccessChecker.isApproved(userId, professorId)) {
+            throw new CertificateNotApprovedException();
+        }
+
+        ExamArchive archive = examArchiveRepository.save(ExamArchive.builder()
+                .userId(userId)
+                .professor(professor)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build());
+
+        String writerSemester = certificateAccessChecker.getApprovedSemester(userId, professorId).orElse("정보없음");
+        return ExamArchiveContentResponse.from(archive, writerSemester);
+    }
+
+    /** 본인 또는 관리자만 삭제 가능 */
+    @Transactional
+    public void delete(Long userId, String role, Long examArchiveId) {
+        ExamArchive archive = examArchiveRepository.findById(examArchiveId)
+                .orElseThrow(ExamArchiveNotFoundException::new);
+
+        boolean isOwner = archive.getUserId().equals(userId);
+        boolean isAdmin = "ADMIN".equals(role);
+
+        if (!isOwner && !isAdmin) {
+            throw new ExamArchiveAccessDeniedException();
+        }
+
+        examArchiveRepository.delete(archive);
+    }
+
+
 }
