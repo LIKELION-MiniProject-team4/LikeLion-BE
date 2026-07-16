@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,6 +116,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(GlobalApiErrorResponse.of(errorCode, traceId));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<GlobalApiErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        String traceId = traceId();
+
+        log.warn("event=max_upload_size_exceeded traceId={} message={}", traceId, e.getMessage());
+
+        return ResponseEntity
+                .status(CommonErrorCode.REQUEST_TOO_LARGE.getHttpStatus())
+                .body(GlobalApiErrorResponse.of(CommonErrorCode.REQUEST_TOO_LARGE, traceId));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
