@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 public enum ReviewResponseCode implements ResponseCode {
     REVIEW_CREATED("REVIEW_201_1", "리뷰 작성에 성공했습니다."),
     REVIEW_LIST_FETCHED("REVIEW_200_1", "리뷰 목록 조회에 성공했습니다."),
-    REVIEW_REPORTED("REVIEW_200_2", "리뷰 신고에 성공했습니다.");
+    REVIEW_REPORTED("REVIEW_200_2", "리뷰 신고에 성공했습니다."),
+    MY_REVIEW_LIST_FETCHED("REVIEW_200_3", "내 리뷰 이력 조회에 성공했습니다.");
 
     private final String code;
     private final String message;
