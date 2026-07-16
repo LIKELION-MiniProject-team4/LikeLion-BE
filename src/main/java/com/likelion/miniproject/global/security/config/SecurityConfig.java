@@ -69,14 +69,12 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/actuator/**").hasAuthority("ADMIN")
 
-                        // TODO: 이 프로젝트의 도메인 인가 규칙을 여기에 추가한다.
-                        // 예) .requestMatchers(HttpMethod.POST, "/api/xxx/**").hasAuthority("ADMIN")
+                        // ADMIN 전용 쓰기 작업은 URL 패턴이 아니라 각 컨트롤러 메서드의 @PreAuthorize로 강제한다.
+                        // URL 와일드카드로 구분하면 의도치 않은 하위 경로(예: 리뷰 작성, 태그 클릭)까지
+                        // 같이 걸리는 문제가 있었음 (실제 발생한 버그).
 
                         .requestMatchers(HttpMethod.GET, "/api/professors/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/professors/**").hasAuthority("ADMIN")
-
                         .requestMatchers(HttpMethod.GET, "/api/tags").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/admin/tags").hasAuthority("ADMIN")
 
                         .anyRequest().authenticated()
                 )

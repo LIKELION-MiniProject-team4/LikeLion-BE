@@ -9,6 +9,7 @@ import com.likelion.miniproject.tag.service.TagService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,8 @@ public class TagController {
         return ResponseEntity.ok(GlobalApiResponse.ok(TagResponseCode.TAG_LIST_FETCHED, result));
     }
 
-    @PostMapping("/api/admin/tags")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/api/tags")
     public ResponseEntity<GlobalApiResponse<TagResponse>> createTag(@Valid @RequestBody TagCreateRequest request) {
         TagResponse result = tagService.createTag(request);
         return ResponseEntity.status(201).body(GlobalApiResponse.created(TagResponseCode.TAG_CREATED, result));

@@ -8,6 +8,7 @@ import com.likelion.miniproject.professor.service.ProfessorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class ProfessorController {
         return ResponseEntity.ok(GlobalApiResponse.ok(ProfessorResponseCode.PROFESSOR_DETAIL_FETCHED, result));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<GlobalApiResponse<ProfessorResponse>> create(@Valid @RequestBody ProfessorCreateRequest request) {
         ProfessorResponse result = professorService.create(request);
