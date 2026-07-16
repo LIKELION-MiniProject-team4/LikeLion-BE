@@ -3,10 +3,13 @@ package com.likelion.miniproject.user.service;
 import com.likelion.miniproject.global.security.jwt.JwtTokenProvider;
 import com.likelion.miniproject.user.controller.request.LoginRequest;
 import com.likelion.miniproject.user.controller.request.SignupRequest;
+import com.likelion.miniproject.user.controller.request.UserUpdateRequest;
 import com.likelion.miniproject.user.controller.response.SignupResponse;
+import com.likelion.miniproject.user.controller.response.UserMeResponse;
 import com.likelion.miniproject.user.entity.User;
 import com.likelion.miniproject.user.exception.DuplicateUsernameException;
 import com.likelion.miniproject.user.exception.InvalidCredentialsException;
+import com.likelion.miniproject.user.exception.UserNotFoundException;
 import com.likelion.miniproject.user.repository.UserRepository;
 import com.likelion.miniproject.user.token.RefreshToken;
 import com.likelion.miniproject.user.token.RefreshTokenRepository;
@@ -77,5 +80,32 @@ public class UserService {
         refreshTokenRepository.deleteByUserId(userId);
 
         log.info("event=user_logout_succeed userId={}", userId);
+    }
+
+    public UserMeResponse getMe(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        return UserMeResponse.from(user);
+    }
+
+    @Transactional
+    public UserMeResponse updateMe(Long userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (request.name() != null) {
+            user.updateName(request.name());
+        }
+        if (request.nickname() != null) {
+            user.updateNickname(request.nickname());
+        }
+        if (request.newPassword() != null) {
+            user.updatePassword(passwordEncoder.encode(request.newPassword()));
+        }
+
+        log.info("event=user_update_me_succeed userId={}", userId);
+
+        return UserMeResponse.from(user);
     }
 }
