@@ -5,6 +5,7 @@ import com.likelion.miniproject.global.certificate.exception.CertificateNotAppro
 import com.likelion.miniproject.professor.entity.Professor;
 import com.likelion.miniproject.professor.service.ProfessorService;
 import com.likelion.miniproject.review.controller.request.ReviewRequest;
+import com.likelion.miniproject.review.controller.response.MyReviewResponse;
 import com.likelion.miniproject.review.controller.response.ReviewResponse;
 import com.likelion.miniproject.review.entity.Review;
 import com.likelion.miniproject.review.entity.ReviewReport;
@@ -70,6 +71,13 @@ public class ReviewService {
 
         String writerSemester = certificateAccessChecker.getApprovedSemester(userId, professorId).orElse("정보없음");
         return ReviewResponse.from(review, writerSemester);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyReviewResponse> getMyReviews(Long userId) {
+        return reviewRepository.findByUserIdWithProfessorAndSubject(userId).stream()
+                .map(MyReviewResponse::from)
+                .toList();
     }
 
     @Transactional

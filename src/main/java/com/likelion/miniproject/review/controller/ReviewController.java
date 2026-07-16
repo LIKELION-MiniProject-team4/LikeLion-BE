@@ -4,6 +4,7 @@ import com.likelion.miniproject.global.response.GlobalApiResponse;
 import com.likelion.miniproject.global.security.jwt.AuthUser;
 import com.likelion.miniproject.review.controller.request.ReviewReportRequest;
 import com.likelion.miniproject.review.controller.request.ReviewRequest;
+import com.likelion.miniproject.review.controller.response.MyReviewResponse;
 import com.likelion.miniproject.review.controller.response.ReviewResponse;
 import com.likelion.miniproject.review.controller.response.ReviewResponseCode;
 import com.likelion.miniproject.review.service.ReviewService;
@@ -35,6 +36,12 @@ public class ReviewController {
     ) {
         ReviewResponse result = reviewService.write(authUser.userId(), professorId, request);
         return ResponseEntity.status(201).body(GlobalApiResponse.created(ReviewResponseCode.REVIEW_CREATED, result));
+    }
+
+    @GetMapping("/api/reviews/me")
+    public ResponseEntity<GlobalApiResponse<List<MyReviewResponse>>> getMyReviews(@AuthenticationPrincipal AuthUser authUser) {
+        List<MyReviewResponse> result = reviewService.getMyReviews(authUser.userId());
+        return ResponseEntity.ok(GlobalApiResponse.ok(ReviewResponseCode.MY_REVIEW_LIST_FETCHED, result));
     }
 
     @PostMapping("/api/reviews/{reviewId}/reports")
