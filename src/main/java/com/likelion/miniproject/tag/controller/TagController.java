@@ -3,6 +3,7 @@ package com.likelion.miniproject.tag.controller;
 import com.likelion.miniproject.global.response.GlobalApiResponse;
 import com.likelion.miniproject.global.security.jwt.AuthUser;
 import com.likelion.miniproject.tag.controller.request.TagCreateRequest;
+import com.likelion.miniproject.tag.controller.response.MyTagClickResponse;
 import com.likelion.miniproject.tag.controller.response.TagResponse;
 import com.likelion.miniproject.tag.controller.response.TagResponseCode;
 import com.likelion.miniproject.tag.service.TagService;
@@ -42,5 +43,11 @@ public class TagController {
     ) {
         tagService.click(authUser.userId(), professorId, tagId);
         return ResponseEntity.ok(GlobalApiResponse.ok(TagResponseCode.TAG_CLICKED));
+    }
+
+    @GetMapping("/api/tags/me")
+    public ResponseEntity<GlobalApiResponse<List<MyTagClickResponse>>> getMyTagClicks(@AuthenticationPrincipal AuthUser authUser) {
+        List<MyTagClickResponse> result = tagService.getMyTagClicks(authUser.userId());
+        return ResponseEntity.ok(GlobalApiResponse.ok(TagResponseCode.MY_TAG_CLICK_LIST_FETCHED, result));
     }
 }
