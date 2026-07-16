@@ -5,6 +5,7 @@ import com.likelion.miniproject.global.certificate.exception.CertificateNotAppro
 import com.likelion.miniproject.professor.entity.Professor;
 import com.likelion.miniproject.professor.service.ProfessorService;
 import com.likelion.miniproject.tag.controller.request.TagCreateRequest;
+import com.likelion.miniproject.tag.controller.response.MyTagClickResponse;
 import com.likelion.miniproject.tag.controller.response.TagResponse;
 import com.likelion.miniproject.tag.entity.Tag;
 import com.likelion.miniproject.tag.entity.TagClick;
@@ -58,5 +59,12 @@ public class TagService {
                 .orElseThrow(TagNotFoundException::new);
 
         tagClickRepository.save(TagClick.builder().userId(userId).professor(professor).tag(tag).build());
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyTagClickResponse> getMyTagClicks(Long userId) {
+        return tagClickRepository.findByUserIdWithProfessorAndTag(userId).stream()
+                .map(MyTagClickResponse::from)
+                .toList();
     }
 }
