@@ -67,4 +67,16 @@ public class User {
     public static User create(String username, String password, String name, String nickname, String phone) {
         return new User(username, password, name, nickname, phone);
     }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }
