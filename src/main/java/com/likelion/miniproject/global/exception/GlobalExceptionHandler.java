@@ -1,6 +1,7 @@
 package com.likelion.miniproject.global.exception;
 
 import com.likelion.miniproject.global.response.GlobalApiErrorResponse;
+import com.likelion.miniproject.global.security.exception.AuthException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -101,6 +102,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(GlobalApiErrorResponse.of(CommonErrorCode.CONFLICT, traceId));
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<GlobalApiErrorResponse> handleAuthException(AuthException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        String traceId = traceId();
+
+        log.warn("event=auth_exception name={} code={} message={} traceId={}",
+                errorCode.name(), errorCode.getCode(), e.getMessage(), traceId);
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(GlobalApiErrorResponse.of(errorCode, traceId));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)

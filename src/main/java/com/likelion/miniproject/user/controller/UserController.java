@@ -7,6 +7,7 @@ import com.likelion.miniproject.user.controller.request.SignupRequest;
 import com.likelion.miniproject.user.controller.response.LoginResponse;
 import com.likelion.miniproject.user.controller.response.SignupResponse;
 import com.likelion.miniproject.user.controller.response.UserResponseCode;
+import com.likelion.miniproject.global.security.jwt.AuthUser;
 import com.likelion.miniproject.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,5 +57,23 @@ public class UserController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(GlobalApiResponse.ok(UserResponseCode.LOGIN_SUCCESS, new LoginResponse(result.accessToken(), result.role())));
+    }
+
+    @Operation(summary = "로그아웃", description = "서버에 저장된 refreshToken을 무효화하고 쿠키를 즉시 만료시킨다.")
+    @PostMapping("/logout")
+    public ResponseEntity<GlobalApiResponse<Void>> logout(@AuthenticationPrincipal AuthUser authUser) {
+        userService.logout(authUser.userId());
+
+        ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, expiredCookie.toString())
+                .body(GlobalApiResponse.ok(UserResponseCode.LOGOUT_SUCCESS));
     }
 }

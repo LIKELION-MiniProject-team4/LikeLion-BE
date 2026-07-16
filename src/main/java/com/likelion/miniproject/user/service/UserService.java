@@ -71,4 +71,11 @@ public class UserService {
 
         return new LoginResult(accessToken, refreshToken, user.getRole().name());
     }
+
+    @Transactional
+    public void logout(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
+
+        log.info("event=user_logout_succeed userId={}", userId);
+    }
 }
