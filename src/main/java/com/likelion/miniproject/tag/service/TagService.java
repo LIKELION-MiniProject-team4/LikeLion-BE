@@ -12,9 +12,11 @@ import com.likelion.miniproject.tag.entity.TagClick;
 import com.likelion.miniproject.tag.exception.DuplicateTagClickException;
 import com.likelion.miniproject.tag.exception.DuplicateTagNameException;
 import com.likelion.miniproject.tag.exception.TagNotFoundException;
+import com.likelion.miniproject.tag.event.TagClickedEvent;
 import com.likelion.miniproject.tag.repository.TagClickRepository;
 import com.likelion.miniproject.tag.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class TagService {
     private final TagClickRepository tagClickRepository;
     private final ProfessorService professorService;
     private final CertificateAccessChecker certificateAccessChecker;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public TagResponse createTag(TagCreateRequest request) {
@@ -55,10 +58,17 @@ public class TagService {
             throw new DuplicateTagClickException();
         }
 
+        // 이 교수에 대한 첫 태그 클릭인지 저장 전에 확인해야 한다 (저장 후엔 항상 true가 됨).
+        boolean isFirstClickForProfessor = !tagClickRepository.existsByUserIdAndProfessorId(userId, professorId);
+
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(TagNotFoundException::new);
 
-        tagClickRepository.save(TagClick.builder().userId(userId).professor(professor).tag(tag).build());
+        TagClick tagClick = tagClickRepository.save(TagClick.builder().userId(userId).professor(professor).tag(tag).build());
+
+        if (isFirstClickForProfessor) {
+            eventPublisher.publishEvent(new TagClickedEvent(tagClick.getId(), userId, professorId));
+        }
     }
 
     @Transactional(readOnly = true)
