@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum UserResponseCode implements ResponseCode {
     SIGNUP_SUCCESS("USER_201_1", "회원가입에 성공했습니다."),
-    LOGIN_SUCCESS("USER_200_1", "로그인에 성공했습니다.");
+    LOGIN_SUCCESS("USER_200_1", "로그인에 성공했습니다."),
+    LOGOUT_SUCCESS("USER_200_2", "로그아웃에 성공했습니다."),
+    GET_ME_SUCCESS("USER_200_3", "내 정보 조회에 성공했습니다."),
+    UPDATE_ME_SUCCESS("USER_200_4", "내 정보 수정에 성공했습니다.");
 
     private final String code;
     private final String message;

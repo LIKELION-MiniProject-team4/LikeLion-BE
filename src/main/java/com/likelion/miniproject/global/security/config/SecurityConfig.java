@@ -62,13 +62,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/token/reissue").permitAll()
                         .requestMatchers("/api/token/validate").authenticated()
 
-                        .requestMatchers(
-                                "/actuator/health",
-                                "/actuator/info",
-                                "/actuator/prometheus"
-                        ).permitAll()
-                        .requestMatchers("/actuator/**").hasAuthority("ADMIN")
-
                         // ADMIN 전용 쓰기 작업은 URL 패턴이 아니라 각 컨트롤러 메서드의 @PreAuthorize로 강제한다.
                         // URL 와일드카드로 구분하면 의도치 않은 하위 경로(예: 리뷰 작성, 태그 클릭)까지
                         // 같이 걸리는 문제가 있었음 (실제 발생한 버그).

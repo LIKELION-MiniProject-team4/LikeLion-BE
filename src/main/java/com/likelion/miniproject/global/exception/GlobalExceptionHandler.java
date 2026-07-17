@@ -1,6 +1,7 @@
 package com.likelion.miniproject.global.exception;
 
 import com.likelion.miniproject.global.response.GlobalApiErrorResponse;
+import com.likelion.miniproject.global.security.exception.AuthException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -101,6 +103,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(GlobalApiErrorResponse.of(CommonErrorCode.CONFLICT, traceId));
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<GlobalApiErrorResponse> handleAuthException(AuthException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        String traceId = traceId();
+
+        log.warn("event=auth_exception name={} code={} message={} traceId={}",
+                errorCode.name(), errorCode.getCode(), e.getMessage(), traceId);
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(GlobalApiErrorResponse.of(errorCode, traceId));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<GlobalApiErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        String traceId = traceId();
+
+        log.warn("event=max_upload_size_exceeded traceId={} message={}", traceId, e.getMessage());
+
+        return ResponseEntity
+                .status(CommonErrorCode.REQUEST_TOO_LARGE.getHttpStatus())
+                .body(GlobalApiErrorResponse.of(CommonErrorCode.REQUEST_TOO_LARGE, traceId));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)

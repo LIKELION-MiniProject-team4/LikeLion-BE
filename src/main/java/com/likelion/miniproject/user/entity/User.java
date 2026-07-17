@@ -20,9 +20,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
-    // 회원가입 시 지급하는 기본 포인트. PointHistory 엔티티가 생기기 전까지는 직접 세팅한다.
-    private static final int SIGNUP_BONUS_POINT = 20;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -59,12 +56,36 @@ public class User {
         this.name = name;
         this.nickname = nickname;
         this.phone = phone;
-        this.point = SIGNUP_BONUS_POINT;
+        this.point = 0;
         this.role = UserRole.USER;
         this.createdAt = LocalDateTime.now();
     }
 
     public static User create(String username, String password, String name, String nickname, String phone) {
         return new User(username, password, name, nickname, phone);
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
+    public void increasePoint(int amount) {
+        this.point += amount;
+    }
+
+    public boolean tryDecreasePoint(int amount) {
+        if (this.point < amount) {
+            return false;
+        }
+        this.point -= amount;
+        return true;
     }
 }

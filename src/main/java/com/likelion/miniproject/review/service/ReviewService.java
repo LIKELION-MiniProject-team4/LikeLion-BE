@@ -5,6 +5,7 @@ import com.likelion.miniproject.global.certificate.exception.CertificateNotAppro
 import com.likelion.miniproject.professor.entity.Professor;
 import com.likelion.miniproject.professor.service.ProfessorService;
 import com.likelion.miniproject.review.controller.request.ReviewRequest;
+import com.likelion.miniproject.review.controller.response.MyReviewResponse;
 import com.likelion.miniproject.review.controller.response.ReviewResponse;
 import com.likelion.miniproject.review.entity.Review;
 import com.likelion.miniproject.review.entity.ReviewReport;
@@ -12,11 +13,13 @@ import com.likelion.miniproject.review.exception.DuplicateReviewException;
 import com.likelion.miniproject.review.exception.DuplicateReviewReportException;
 import com.likelion.miniproject.review.exception.ReviewNotFoundException;
 import com.likelion.miniproject.review.exception.SubjectProfessorMismatchException;
+import com.likelion.miniproject.review.event.ReviewWrittenEvent;
 import com.likelion.miniproject.review.repository.ReviewReportRepository;
 import com.likelion.miniproject.review.repository.ReviewRepository;
 import com.likelion.miniproject.subject.entity.Subject;
 import com.likelion.miniproject.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,7 @@ public class ReviewService {
     private final ProfessorService professorService;
     private final SubjectService subjectService;
     private final CertificateAccessChecker certificateAccessChecker;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> getReviews(Long professorId) {
@@ -68,8 +72,17 @@ public class ReviewService {
                 .content(request.getContent())
                 .build());
 
+        eventPublisher.publishEvent(new ReviewWrittenEvent(review.getId(), userId));
+
         String writerSemester = certificateAccessChecker.getApprovedSemester(userId, professorId).orElse("정보없음");
         return ReviewResponse.from(review, writerSemester);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyReviewResponse> getMyReviews(Long userId) {
+        return reviewRepository.findByUserIdWithProfessorAndSubject(userId).stream()
+                .map(MyReviewResponse::from)
+                .toList();
     }
 
     @Transactional
