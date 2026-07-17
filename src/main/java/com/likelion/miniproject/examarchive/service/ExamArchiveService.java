@@ -20,6 +20,8 @@ import com.likelion.miniproject.examarchive.controller.request.ExamArchiveWriteR
 import com.likelion.miniproject.examarchive.exception.ExamArchiveAccessDeniedException;
 import com.likelion.miniproject.global.certificate.exception.CertificateNotApprovedException;
 
+import org.springframework.dao.DataIntegrityViolationException;
+
 import java.util.List;
 
 @Service
@@ -51,24 +53,23 @@ public class ExamArchiveService {
      * 족보 열람.
      * - 최초 열람 시 포인트 -10 차감 (부족하면 402)
      * - 이미 열람한 기록이 있으면 재차감 없이 내용만 반환
+     *
+     * 동시성 방지: "확인 후 저장" 대신 "저장을 먼저 시도"하는 순서로 바꿈.
+     * user_id+exam_archive_id 유니크 제약 덕분에, 동시 요청이 와도 저장은 단 하나만 성공한다.
+     * (완벽한 방지는 아니지만 - 포인트 차감과 저장 사이의 미세한 시간차는 여전히 남아있음 -
+     *  적어도 "동시에 둘 다 확인을 통과하는" 가장 흔한 경합 시나리오는 막아준다.)
      */
     @Transactional
     public ExamArchiveContentResponse view(Long userId, Long examArchiveId) {
         ExamArchive archive = examArchiveRepository.findById(examArchiveId)
                 .orElseThrow(ExamArchiveNotFoundException::new);
 
-        boolean alreadyViewed = examArchiveViewRepository
-                .findByUserIdAndExamArchiveId(userId, examArchiveId)
-                .isPresent();
+        boolean isFirstView = tryRecordView(userId, archive);
 
-        if (!alreadyViewed) {
+        if (isFirstView) {
             if (!userPointManager.deduct(userId, VIEW_POINT_COST, PointReason.EXAM_ARCHIVE_VIEW)) {
                 throw new InsufficientPointException();
             }
-            examArchiveViewRepository.save(ExamArchiveView.builder()
-                    .userId(userId)
-                    .examArchive(archive)
-                    .build());
         }
 
         String writerSemester = certificateAccessChecker
@@ -76,6 +77,26 @@ public class ExamArchiveService {
                 .orElse("정보없음");
 
         return ExamArchiveContentResponse.from(archive, writerSemester);
+    }
+
+    /**
+     * 열람 기록 저장을 먼저 시도한다.
+     * @return 이번이 처음 열람이면 true, 이미 열람한 기록이 있었으면 false
+     */
+    private boolean tryRecordView(Long userId, ExamArchive archive) {
+        if (examArchiveViewRepository.findByUserIdAndExamArchiveId(userId, archive.getId()).isPresent()) {
+            return false;
+        }
+        try {
+            examArchiveViewRepository.save(ExamArchiveView.builder()
+                    .userId(userId)
+                    .examArchive(archive)
+                    .build());
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            // 동시 요청으로 인해 유니크 제약 위반 -> 다른 요청이 먼저 기록을 남긴 것
+            return false;
+        }
     }
 
     /** 텍스트 전용 작성. 수강확인서 승인자만 가능 */
