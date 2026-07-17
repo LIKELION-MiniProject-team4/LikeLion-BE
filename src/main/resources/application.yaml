@@ -26,6 +26,7 @@ app:
       - http://localhost:3000
       - http://localhost:8080
       - http://127.0.0.1:5500
+      - https://sprightly-douhua-2a8b08.netlify.app
 
 # 실제 S3 버킷 준비되면 환경변수(AWS_REGION 등)로 채울 것. 지금은 로컬 부팅만 되게 기본값 넣어둠.
 cloud:
