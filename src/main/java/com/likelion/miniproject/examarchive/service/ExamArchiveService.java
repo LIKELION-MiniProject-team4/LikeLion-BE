@@ -64,11 +64,18 @@ public class ExamArchiveService {
         ExamArchive archive = examArchiveRepository.findById(examArchiveId)
                 .orElseThrow(ExamArchiveNotFoundException::new);
 
-        boolean isFirstView = tryRecordView(userId, archive);
+        boolean isOwner = archive.getUserId().equals(userId);
 
-        if (isFirstView) {
-            if (!userPointManager.deduct(userId, VIEW_POINT_COST, PointReason.EXAM_ARCHIVE_VIEW)) {
-                throw new InsufficientPointException();
+        if (!isOwner) {
+            boolean isFirstView = tryRecordView(userId, archive);
+            if (isFirstView) {
+                if (!userPointManager.deduct(
+                        userId,
+                        VIEW_POINT_COST,
+                        PointReason.EXAM_ARCHIVE_VIEW
+                )) {
+                    throw new InsufficientPointException();
+                }
             }
         }
 
