@@ -51,6 +51,6 @@ public class ReviewController {
             @Valid @RequestBody ReviewReportRequest request
     ) {
         reviewService.report(authUser.userId(), reviewId, request.getReason());
-        return ResponseEntity.ok(GlobalApiResponse.ok(ReviewResponseCode.REVIEW_REPORTED));
+        return ResponseEntity.status(201).body(GlobalApiResponse.created(ReviewResponseCode.REVIEW_REPORTED));
     }
 }

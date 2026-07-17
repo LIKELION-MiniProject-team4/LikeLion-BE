@@ -2,6 +2,7 @@ package com.likelion.miniproject.review.service;
 
 import com.likelion.miniproject.global.certificate.CertificateAccessChecker;
 import com.likelion.miniproject.global.certificate.exception.CertificateNotApprovedException;
+import com.likelion.miniproject.global.point.UserPointManager;
 import com.likelion.miniproject.professor.entity.Professor;
 import com.likelion.miniproject.professor.service.ProfessorService;
 import com.likelion.miniproject.review.controller.request.ReviewRequest;
@@ -23,11 +24,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.likelion.miniproject.review.exception.SelfReportNotAllowedException;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+
+    private static final int REVIEW_WRITE_POINT_REWARD = 3;
 
     private final ReviewRepository reviewRepository;
     private final ReviewReportRepository reviewReportRepository;
@@ -35,11 +40,12 @@ public class ReviewService {
     private final SubjectService subjectService;
     private final CertificateAccessChecker certificateAccessChecker;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserPointManager userPointManager;
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> getReviews(Long professorId) {
         professorService.getProfessorOrThrow(professorId);
-        return reviewRepository.findByProfessorIdOrderByCreatedAtAsc(professorId).stream()
+        return reviewRepository.findReviewsWithSubjectByProfessorId(professorId).stream()
                 .map(review -> ReviewResponse.from(
                         review,
                         certificateAccessChecker.getApprovedSemester(review.getUserId(), professorId)
@@ -72,6 +78,8 @@ public class ReviewService {
                 .content(request.getContent())
                 .build());
 
+        userPointManager.earn(userId, REVIEW_WRITE_POINT_REWARD);
+
         eventPublisher.publishEvent(new ReviewWrittenEvent(review.getId(), userId));
 
         String writerSemester = certificateAccessChecker.getApprovedSemester(userId, professorId).orElse("정보없음");
@@ -89,6 +97,10 @@ public class ReviewService {
     public void report(Long reporterId, Long reviewId, String reason) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewNotFoundException::new);
+
+        if (review.getUserId().equals(reporterId)) {
+            throw new SelfReportNotAllowedException();
+        }
 
         if (reviewReportRepository.existsByReviewIdAndReporterId(reviewId, reporterId)) {
             throw new DuplicateReviewReportException();

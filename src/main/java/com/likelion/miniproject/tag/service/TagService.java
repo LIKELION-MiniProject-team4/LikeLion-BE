@@ -20,6 +20,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.likelion.miniproject.global.point.UserPointManager;
+
 import java.util.List;
 
 @Service
@@ -31,6 +33,9 @@ public class TagService {
     private final ProfessorService professorService;
     private final CertificateAccessChecker certificateAccessChecker;
     private final ApplicationEventPublisher eventPublisher;
+
+    private static final int TAG_CLICK_POINT_REWARD = 2;
+    private final UserPointManager userPointManager;
 
     @Transactional
     public TagResponse createTag(TagCreateRequest request) {
@@ -64,6 +69,8 @@ public class TagService {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(TagNotFoundException::new);
 
+        tagClickRepository.save(TagClick.builder().userId(userId).professor(professor).tag(tag).build());
+        userPointManager.earn(userId, TAG_CLICK_POINT_REWARD);
         TagClick tagClick = tagClickRepository.save(TagClick.builder().userId(userId).professor(professor).tag(tag).build());
 
         if (isFirstClickForProfessor) {
