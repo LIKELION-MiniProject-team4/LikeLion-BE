@@ -9,6 +9,7 @@ import com.likelion.miniproject.examarchive.exception.InsufficientPointException
 import com.likelion.miniproject.examarchive.repository.ExamArchiveRepository;
 import com.likelion.miniproject.examarchive.repository.ExamArchiveViewRepository;
 import com.likelion.miniproject.global.certificate.CertificateAccessChecker;
+import com.likelion.miniproject.global.point.PointReason;
 import com.likelion.miniproject.global.point.UserPointManager;
 import com.likelion.miniproject.professor.service.ProfessorService;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +62,7 @@ public class ExamArchiveService {
                 .isPresent();
 
         if (!alreadyViewed) {
-            if (!userPointManager.deduct(userId, VIEW_POINT_COST)) {
+            if (!userPointManager.deduct(userId, VIEW_POINT_COST, PointReason.EXAM_ARCHIVE_VIEW)) {
                 throw new InsufficientPointException();
             }
             examArchiveViewRepository.save(ExamArchiveView.builder()

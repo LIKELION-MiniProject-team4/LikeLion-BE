@@ -1,6 +1,8 @@
 package com.likelion.miniproject.user.service;
 
+import com.likelion.miniproject.global.point.PointReason;
 import com.likelion.miniproject.global.security.jwt.JwtTokenProvider;
+import com.likelion.miniproject.point.service.PointService;
 import com.likelion.miniproject.user.controller.request.LoginRequest;
 import com.likelion.miniproject.user.controller.request.SignupRequest;
 import com.likelion.miniproject.user.controller.request.UserUpdateRequest;
@@ -24,10 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final int SIGNUP_BONUS_POINT = 20;
+
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PointService pointService;
 
     public record LoginResult(String accessToken, String refreshToken, String role) {
     }
@@ -46,6 +51,8 @@ public class UserService {
                 request.phone()
         );
         userRepository.save(user);
+
+        pointService.earn(user.getId(), SIGNUP_BONUS_POINT, PointReason.SIGNUP_BONUS);
 
         log.info("event=user_signup_succeed userId={}", user.getId());
 
