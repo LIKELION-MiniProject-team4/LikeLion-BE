@@ -23,6 +23,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.likelion.miniproject.review.exception.SelfReportNotAllowedException;
+
 import java.util.List;
 
 @Service
@@ -39,7 +41,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<ReviewResponse> getReviews(Long professorId) {
         professorService.getProfessorOrThrow(professorId);
-        return reviewRepository.findByProfessorIdOrderByCreatedAtAsc(professorId).stream()
+        return reviewRepository.findReviewsWithSubjectByProfessorId(professorId).stream()
                 .map(review -> ReviewResponse.from(
                         review,
                         certificateAccessChecker.getApprovedSemester(review.getUserId(), professorId)
@@ -89,6 +91,10 @@ public class ReviewService {
     public void report(Long reporterId, Long reviewId, String reason) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewNotFoundException::new);
+
+        if (review.getUserId().equals(reporterId)) {
+            throw new SelfReportNotAllowedException();
+        }
 
         if (reviewReportRepository.existsByReviewIdAndReporterId(reviewId, reporterId)) {
             throw new DuplicateReviewReportException();
