@@ -2,7 +2,6 @@ package com.likelion.miniproject.review.service;
 
 import com.likelion.miniproject.global.certificate.CertificateAccessChecker;
 import com.likelion.miniproject.global.certificate.exception.CertificateNotApprovedException;
-import com.likelion.miniproject.global.point.UserPointManager;
 import com.likelion.miniproject.professor.entity.Professor;
 import com.likelion.miniproject.professor.service.ProfessorService;
 import com.likelion.miniproject.review.controller.request.ReviewRequest;
@@ -32,15 +31,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    private static final int REVIEW_WRITE_POINT_REWARD = 3;
-
     private final ReviewRepository reviewRepository;
     private final ReviewReportRepository reviewReportRepository;
     private final ProfessorService professorService;
     private final SubjectService subjectService;
     private final CertificateAccessChecker certificateAccessChecker;
     private final ApplicationEventPublisher eventPublisher;
-    private final UserPointManager userPointManager;
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> getReviews(Long professorId) {
@@ -77,8 +73,6 @@ public class ReviewService {
                 .subject(subject)
                 .content(request.getContent())
                 .build());
-
-        userPointManager.earn(userId, REVIEW_WRITE_POINT_REWARD);
 
         eventPublisher.publishEvent(new ReviewWrittenEvent(review.getId(), userId));
 

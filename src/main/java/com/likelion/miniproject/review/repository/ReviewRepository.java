@@ -15,9 +15,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "WHERE r.professor.id = :professorId ORDER BY r.createdAt ASC")
     List<Review> findReviewsWithSubjectByProfessorId(@Param("professorId") Long professorId);
 
-    List<Review> findByUserIdOrderByCreatedAtDesc(Long userId);
-    List<Review> findByProfessorIdOrderByCreatedAtAsc(Long professorId);
-
     @Query("SELECT r FROM Review r " +
             "JOIN FETCH r.professor " +
             "JOIN FETCH r.subject " +

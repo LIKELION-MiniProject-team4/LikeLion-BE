@@ -67,8 +67,6 @@ public class ExamArchiveService {
         boolean isFirstView = tryRecordView(userId, archive);
 
         if (isFirstView) {
-            if (!userPointManager.deduct(userId, VIEW_POINT_COST)) {
-        if (!alreadyViewed) {
             if (!userPointManager.deduct(userId, VIEW_POINT_COST, PointReason.EXAM_ARCHIVE_VIEW)) {
                 throw new InsufficientPointException();
             }
