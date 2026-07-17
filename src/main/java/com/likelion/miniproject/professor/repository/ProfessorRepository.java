@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
-    @Query("SELECT p FROM Professor p " +
-            "WHERE (:departmentName IS NULL OR p.department.name = :departmentName) " +
+    @Query("SELECT p FROM Professor p JOIN FETCH p.department " +
+            "WHERE (:department IS NULL OR p.department.name = :department) " +
             "ORDER BY p.name ASC")
-    List<Professor> search(@Param("departmentName") String departmentName);
+    List<Professor> findProfessorsWithDepartment(@Param("department") String department);
 }

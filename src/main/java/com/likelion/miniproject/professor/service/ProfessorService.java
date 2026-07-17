@@ -37,7 +37,7 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public List<ProfessorResponse> getList(String departmentName) {
-        return professorRepository.search(departmentName).stream()
+        return professorRepository.findProfessorsWithDepartment(departmentName).stream()
                 .map(ProfessorResponse::from)
                 .toList();
     }
