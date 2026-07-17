@@ -31,3 +31,17 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/likelion-mini-project:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/likelion-mini-project:${{ github.sha }}
+
+      - name: Zip Dockerrun.aws.json for EB deployment
+        run: zip -j deploy.zip Dockerrun.aws.json
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: likelion-mini-project
+          environment_name: Likelion-mini-project-env
+          version_label: ${{ github.sha }}
+          region: ap-northeast-2
+          deployment_package: deploy.zip
