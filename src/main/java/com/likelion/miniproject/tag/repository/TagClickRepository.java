@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface TagClickRepository extends JpaRepository<TagClick, Long> {
     boolean existsByUserIdAndProfessorIdAndTagId(Long userId, Long professorId, Long tagId);
+    boolean existsByUserIdAndProfessorId(Long userId, Long professorId);
 
     @Query("SELECT tc FROM TagClick tc " +
             "JOIN FETCH tc.professor " +
